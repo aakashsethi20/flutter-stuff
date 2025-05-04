@@ -17,96 +17,106 @@ class ChallengeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isCompleted = challenge?.isCompleted == true;
+    final bool isEmpty = challenge == null;
+
+    // Define a list of gradient pairs for the tiles
+    final List<List<Color>> gradientPairs = [
+      [const Color(0xFF9C27B0), const Color(0xFF7B1FA2)], // Purple
+      [const Color(0xFF673AB7), const Color(0xFF512DA8)], // Deep Purple
+      [const Color(0xFF3F51B5), const Color(0xFF303F9F)], // Indigo
+      [const Color(0xFF2196F3), const Color(0xFF1976D2)], // Blue
+      [const Color(0xFF009688), const Color(0xFF00796B)], // Teal
+    ];
+
+    // Use modulo to cycle through the colors
+    final int colorIndex = index % gradientPairs.length;
+
+    // Colors for the tile
+    final List<Color> tileGradient =
+        isCompleted
+            ? [
+              const Color(0xFF388E3C),
+              const Color(0xFF2E7D32),
+            ] // Green for completed
+            : gradientPairs[colorIndex];
+
     return GestureDetector(
       onTap: onTap,
       onLongPress: onLongPress,
       child: Container(
+        margin: const EdgeInsets.all(3),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              challenge?.isCompleted == true
-                  ? Theme.of(context).colorScheme.tertiary
-                  : Theme.of(context).colorScheme.primaryContainer,
-              challenge?.isCompleted == true
-                  ? Theme.of(context).colorScheme.tertiaryContainer
-                  : Theme.of(context).colorScheme.secondaryContainer,
-            ],
+            colors:
+                isEmpty
+                    ? [Colors.grey.shade900, Colors.grey.shade800]
+                    : tileGradient,
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color:
+                  isCompleted
+                      ? Colors.green.withOpacity(0.3)
+                      : isEmpty
+                      ? Colors.black.withOpacity(0.2)
+                      : tileGradient[0].withOpacity(0.3),
+              blurRadius: 5,
+              spreadRadius: 1,
             ),
           ],
+          border: Border.all(
+            color:
+                isCompleted
+                    ? Colors.green.withOpacity(0.5)
+                    : isEmpty
+                    ? Colors.grey.shade700.withOpacity(0.3)
+                    : tileGradient[0].withOpacity(0.5),
+            width: isCompleted ? 2.0 : 1.0,
+          ),
         ),
         child: Stack(
           children: [
-            if (challenge?.isCompleted == true)
+            if (isCompleted)
               Positioned(
-                top: -10,
-                right: -10,
-                child: Transform.rotate(
-                  angle: 0.4,
-                  child: Icon(
-                    Icons.check_circle,
-                    size: 40,
-                    color: Theme.of(context).colorScheme.tertiary,
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    shape: BoxShape.circle,
                   ),
+                  child: const Icon(Icons.check, size: 16, color: Colors.white),
                 ),
               ),
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withOpacity(0.2),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  challenge?.title ?? 'Tap',
+                  style: TextStyle(
+                    color: isEmpty ? Colors.grey.shade500 : Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                    shadows:
+                        isEmpty
+                            ? []
+                            : [
+                              Shadow(
+                                blurRadius: 3,
+                                color: Colors.black.withOpacity(0.5),
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
                   ),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      challenge?.title ?? 'Tap to add challenge',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (challenge?.description != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        challenge!.description,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer.withOpacity(0.7),
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ] else if (challenge == null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Long press to complete',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer.withOpacity(0.5),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ],
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),

@@ -3,6 +3,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../models/challenge.dart';
 
 class ChallengeProvider with ChangeNotifier {
+  static const int GRID_SIZE = 5;
+  static const int CHALLENGE_COUNT =
+      GRID_SIZE * GRID_SIZE; // 5x5 = 25 challenges
+
   List<Challenge> _challenges = [];
   Box<Challenge>? _challengesBox;
   bool _isInitialized = false;
@@ -29,7 +33,7 @@ class ChallengeProvider with ChangeNotifier {
     try {
       if (!_isInitialized) await init();
 
-      if (position != null && position >= 0 && position < 9) {
+      if (position != null && position >= 0 && position < CHALLENGE_COUNT) {
         // Remove existing challenge at position if any
         final existingChallenges = _challengesBox?.values.toList() ?? [];
         if (position < existingChallenges.length) {
@@ -78,6 +82,15 @@ class ChallengeProvider with ChangeNotifier {
       debugPrint('Error toggling challenge: $e');
       rethrow;
     }
+  }
+
+  int getCompletedCount() {
+    return _challenges.where((challenge) => challenge.isCompleted).length;
+  }
+
+  double getCompletionPercentage() {
+    if (_challenges.isEmpty) return 0.0;
+    return getCompletedCount() / _challenges.length;
   }
 
   @override
